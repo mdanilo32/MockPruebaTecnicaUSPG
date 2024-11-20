@@ -1,5 +1,17 @@
 ﻿@{
-    ViewData["Title"] = "CargaArchivo";
+    ViewData["Title"] = "CargarArchivo";
 }
 <h1>@ViewData["Title"]</h1>
 
+<form asp-action="Upload" asp-controller="Home" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="salesFile">Seleccione el archivo excel: </label>
+        <input type="file" name="salesFile" accept=".xlsx" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-primary mt-2">Upload</button>
+</form>
+
+@if (ViewData["Message"] != null)
+{
+    <div class="alert alert-info mt-3">@ViewData["Message"]</div>
+}

@@ -1,8 +1,85 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Dashboard";
+    var totalVentas = ViewData["TotalVentas"];
+    var totalUnidades = ViewData["TotalUnidades"];
+    var ventasPorMes = ViewData["VentasPorMes"] as IEnumerable<dynamic>;
+    var ventasPorMarca = ViewData["VentasPorMarca"] as IEnumerable<dynamic>;
+    var topProductos = ViewData["TopProductos"] as IEnumerable<dynamic>;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="dashboard">
+    <!-- Tarjetas -->
+    <div class="card">Total de Ventas: <span>@totalVentas</span> 💰</div>
+    <div class="card">Total de Unidades Vendidas: <span>@totalUnidades</span> 📦</div>
+
+    <!-- Gráfico de líneas: Ventas por mes -->
+    <h3>Total de Ventas por Mes</h3>
+    <canvas id="ventasMensualesChart"></canvas>
+
+    <!-- Gráfico de pie: Ventas por marca -->
+    <h3>Ventas por Marca</h3>
+    <canvas id="ventasPorMarcaPieChart"></canvas>
+
+    <!-- Gráfico de barras: Top 10 productos -->
+    <h3>Top 10 Productos Más Vendidos</h3>
+    <canvas id="topProductosBarChart"></canvas>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Convertir datos de Razor a JSON para uso en JavaScript
+        const ventasPorMesLabels = @Html.Raw(Json.Serialize(ventasPorMes.Select(vm => $"{vm.Mes}/{vm.Año}")));
+        const ventasPorMesData = @Html.Raw(Json.Serialize(ventasPorMes.Select(vm => vm.TotalVentas)));
+
+        const ventasPorMarcaLabels = @Html.Raw(Json.Serialize(ventasPorMarca.Select(vp => vp.Marca)));
+        const ventasPorMarcaData = @Html.Raw(Json.Serialize(ventasPorMarca.Select(vp => vp.TotalVentas)));
+
+        const topProductosLabels = @Html.Raw(Json.Serialize(topProductos.Select(tp => tp.Producto)));
+        const topProductosData = @Html.Raw(Json.Serialize(topProductos.Select(tp => tp.CantidadVendida)));
+
+        // Gráfico de líneas: Ventas por mes
+        var ventasMensualesCtx = document.getElementById('ventasMensualesChart').getContext('2d');
+        var ventasMensualesChart = new Chart(ventasMensualesCtx, {
+            type: 'line',
+            data: {
+                labels: ventasPorMesLabels,
+                datasets: [{
+                    label: 'Total Ventas',
+                    data: ventasPorMesData,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2
+                }]
+            }
+        });
+
+        // Gráfico de pie: Ventas por marca
+        var ventasPorMarcaCtx = document.getElementById('ventasPorMarcaPieChart').getContext('2d');
+        var ventasPorMarcaChart = new Chart(ventasPorMarcaCtx, {
+            type: 'pie',
+            data: {
+                labels: ventasPorMarcaLabels,
+                datasets: [{
+                    data: ventasPorMarcaData,
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40']
+                }]
+            }
+        });
+
+        // Gráfico de barras: Top 10 productos más vendidos
+        var topProductosCtx = document.getElementById('topProductosBarChart').getContext('2d');
+        var topProductosChart = new Chart(topProductosCtx, {
+            type: 'bar',
+            data: {
+                labels: topProductosLabels,
+                datasets: [{
+                    label: 'Cantidad Vendida',
+                    data: topProductosData,
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            }
+        });
+    </script>
+}
